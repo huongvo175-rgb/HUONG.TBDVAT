@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Animal Cell Lab – Khám phá tế bào động vật</title>
+<style>
+:root{--ink:#18324b;--muted:#60758a;--blue:#176b87;--mint:#dff5ef;--paper:#f4f8fb;--line:#dce7ef;--gold:#f5bd54}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:var(--paper);color:var(--ink)}
+header{background:linear-gradient(120deg,#123b59,#167d87);color:white;padding:28px max(5vw,20px) 34px}
+.kicker{letter-spacing:.16em;font-size:12px;font-weight:800;color:#bcebe2}h1{font-size:clamp(28px,5vw,48px);margin:10px 0 6px}.sub{color:#d9f0f0}
+nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}button{border:0;border-radius:12px;padding:11px 15px;background:#e8f5f5;color:#17465b;font-weight:750;cursor:pointer}button:hover{filter:brightness(.96);transform:translateY(-1px)}button.primary{background:#f5c76b;color:#26384a}
+main{max-width:1200px;margin:26px auto;padding:0 18px}.intro{margin:0 0 20px;color:var(--muted);line-height:1.65}
+.layout{display:grid;grid-template-columns: minmax(260px,340px) 1fr;gap:18px}.panel{background:white;border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 8px 28px #24455b0b}
+h2{font-size:20px;margin:0 0 14px}.search{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;font-size:15px;margin-bottom:12px}
+.parts{display:grid;gap:7px;max-height:620px;overflow:auto}.part{display:flex;align-items:center;gap:10px;text-align:left;background:#f5f9fb;border:1px solid transparent;padding:10px;border-radius:11px;color:var(--ink)}.part.active{background:#e2f5f0;border-color:#70c5b2}.num{display:grid;place-items:center;min-width:28px;height:28px;border-radius:9px;background:#dcecf4;font-weight:800;color:#15516c}
+.stage{min-width:0}.stagehead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.stagehead p{color:var(--muted);font-size:13px;margin:0}.canvas{background:radial-gradient(circle at 50% 45%,#f8ffff,#e9f3f7);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+svg{display:block;width:100%;height:auto;max-height:570px}.hot{cursor:pointer;outline:none}.hot:hover{filter:brightness(1.08);stroke:#153e58;stroke-width:3}.hot.selected{stroke:#f0a928;stroke-width:5}
+.detail{margin-top:16px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start}.detail p{color:var(--muted);line-height:1.6;margin:8px 0}.tag{display:inline-block;padding:6px 10px;background:#e7f5f1;color:#176b60;border-radius:99px;font-size:12px;font-weight:800}
+.controls{display:flex;gap:8px;flex-wrap:wrap}.quiz{margin-top:22px}.answers{display:grid;grid-template-columns:1fr 1fr;gap:9px}.answers button{text-align:left;background:#f2f7fa;border:1px solid var(--line);color:var(--ink)}.feedback{font-weight:700;margin-top:12px;min-height:24px}.foot{color:var(--muted);font-size:12px;text-align:center;padding:25px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.parts{grid-template-columns:1fr 1fr;max-height:300px}.answers{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+ <div class="kicker">BIOLOGY LAB · SINH HỌC KHÁM PHÁ</div>
+ <h1>Khám phá tế bào động vật</h1>
+ <div class="sub">Mô hình tương tác · Quan sát cấu tạo · Tìm hiểu chức năng từng bào quan</div>
+ <nav><button class="primary" onclick="document.querySelector('#khampha').scrollIntoView({behavior:'smooth'})">🔬 Khám phá mô hình</button><button onclick="document.querySelector('#onthap').scrollIntoView({behavior:'smooth'})">✦ Ôn tập kiến thức</button></nav>
+</header>
+<main>
+<p class="intro">Tế bào động vật là đơn vị cấu trúc và chức năng cơ bản của cơ thể động vật. Hãy chọn một thành phần trên hình hoặc trong danh sách để mở hồ sơ tìm hiểu. Hình vẽ chỉ mang tính minh họa, không thể hiện đúng tỉ lệ và số lượng bào quan trong tế bào thật.</p>
+<section class="layout" id="khampha">
+ <aside class="panel">
+  <h2>Thành phần tế bào</h2>
+  <input id="search" class="search" placeholder="Tìm bào quan..." oninput="renderList()">
+  <div class="parts" id="parts"></div>
+ </aside>
+ <section class="panel stage">
+  <div class="stagehead"><div><h2>Mô hình tế bào động vật</h2><p>Chọn số hoặc bào quan trên hình để khám phá</p></div><div class="controls"><button onclick="zoom(1.1)">＋</button><button onclick="zoom(.9)">－</button><button onclick="resetZoom()">↺</button></div></div>
+  <div class="canvas">
+  <svg id="cell" viewBox="0 0 800 570" role="img" aria-label="Sơ đồ tế bào động vật có các bào quan được đánh số">
+   <defs>
+    <radialGradient id="cyto"><stop stop-color="#fff5d9"/><stop offset="1" stop-color="#f4c98b"/></radialGradient>
+    <linearGradient id="nuc" x2="1" y2="1"><stop stop-color="#b8a4e8"/><stop offset="1" stop-color="#7864b7"/></linearGradient>
+    <linearGradient id="mito"><stop stop-color="#f6a36d"/><stop offset="1" stop-color="#e66d58"/></linearGradient>
+   </defs>
+   <g id="zoomGroup">
+    <path d="M400 65 C560 50 710 160 724 290 C742 425 600 505 425 510 C240 520 82 445 76 290 C70 150 220 70 400 65Z" fill="url(#cyto)" stroke="#267d91" stroke-width="13" class="hot" data-id="1"/>
+    <path d="M400 78 C555 65 694 169 708 291 C720 411 585 490 425 495 C250 502 100 431 94 291 C90 164 230 84 400 78Z" fill="none" stroke="#77c9c4" stroke-width="3" stroke-dasharray="7 8" pointer-events="none"/>
+    <!-- nucleus -->
+    <ellipse cx="390" cy="286" rx="112" ry="94" fill="url(#nuc)" stroke="#58478e" stroke-width="7" class="hot" data-id="2"/>
+    <ellipse cx="414" cy="284" rx="36" ry="31" fill="#51417e" class="hot" data-id="3"/>
+    <path d="M305 240q40 -35 70 0t70 0" fill="none" stroke="#e5dafa" stroke-width="7" stroke-linecap="round" class="hot" data-id="4"/>
+    <!-- ER -->
+    <g fill="none" stroke="#338ca0" stroke-width="12" stroke-linecap="round" class="hot" data-id="5"><path d="M285 170q45 -35 90 0t90 0"/><path d="M278 190q45 -35 90 0t90 0"/><path d="M286 210q45 -35 90 0t90 0"/></g>
+    <g fill="#315e91" class="hot" data-id="6"><circle cx="300" cy="155" r="5"/><circle cx="325" cy="148" r="5"/><circle cx="355" cy="153" r="5"/><circle cx="390" cy="150" r="5"/><circle cx="420" cy="155" r="5"/><circle cx="450" cy="150" r="5"/></g>
+    <!-- golgi -->
+    <g fill="none" stroke="#e2a34e" stroke-width="10" stroke-linecap="round" class="hot" data-id="7"><path d="M510 195q55 -30 95 0"/><path d="M505 218q65 -28 105 0"/><path d="M510 241q55 -25 95 0"/><path d="M520 264q45 -20 80 0"/></g>
+    <!-- mitochondria -->
+    <g class="hot" data-id="8"><ellipse cx="210" cy="300" rx="57" ry="29" transform="rotate(-25 210 300)" fill="url(#mito)" stroke="#a84d43" stroke-width="4"/><path d="M165 311q20 -42 38 -10t34 -9t25 0" fill="none" stroke="#8e3d3b" stroke-width="5"/></g>
+    <g class="hot" data-id="8"><ellipse cx="560" cy="355" rx="57" ry="29" transform="rotate(22 560 355)" fill="url(#mito)" stroke="#a84d43" stroke-width="4"/><path d="M514 343q20 -35 38 -5t34 -7t25 0" fill="none" stroke="#8e3d3b" stroke-width="5"/></g>
+    <!-- lysosomes and vesicles -->
+    <g fill="#8cc8a5" stroke="#398c6b" stroke-width="3" class="hot" data-id="9"><circle cx="165" cy="390" r="19"/><circle cx="640" cy="285" r="17"/></g>
+    <g fill="#e7a5bc" stroke="#a95e82" stroke-width="3" class="hot" data-id="10"><circle cx="610" cy="420" r="15"/><circle cx="270" cy="430" r="12"/></g>
+    <!-- centrosome -->
+    <g class="hot" data-id="11" transform="translate(510 125)"><rect x="-30" y="-8" width="58" height="17" rx="8" fill="#6b9cc8" transform="rotate(35)"/><rect x="-30" y="-8" width="58" height="17" rx="8" fill="#4776a7" transform="rotate(-35)"/></g>
+    <!-- cytoskeleton -->
+    <g fill="none" stroke="#d18b45" stroke-width="4" opacity=".8" class="hot" data-id="12"><path d="M145 235L650 465M145 450L650 180M180 160L610 450"/></g>
+    <!-- ribosomes -->
+    <g fill="#405f82" class="hot" data-id="6"><circle cx="250" cy="220" r="5"/><circle cx="235" cy="240" r="5"/><circle cx="460" cy="420" r="5"/><circle cx="480" cy="435" r="5"/><circle cx="350" cy="440" r="5"/></g>
+    <!-- labels -->
+    <g font-family="Arial" font-size="17" font-weight="bold" text-anchor="middle" fill="#17384d" pointer-events="none">
+     <g><circle cx="110" cy="120" r="16" fill="white"/><text x="110" y="126">1</text></g>
+     <g><circle cx="390" cy="286" r="16" fill="white"/><text x="390" y="292">2</text></g>
+     <g><circle cx="414" cy="284" r="16" fill="white"/><text x="414" y="290">3</text></g>
+     <g><circle cx="330" cy="190" r="16" fill="white"/><text x="330" y="196">5</text></g>
+     <g><circle cx="560" cy="190" r="16" fill="white"/><text x="560" y="196">7</text></g>
+     <g><circle cx="205" cy="300" r="16" fill="white"/><text x="205" y="306">8</text></g>
+     <g><circle cx="165" cy="390" r="16" fill="white"/><text x="165" y="396">9</text></g>
+     <g><circle cx="510" cy="125" r="16" fill="white"/><text x="510" y="131">11</text></g>
+    </g>
+   </g>
+  </svg></div>
+  <div class="detail"><div><span class="tag" id="category">BẮT ĐẦU KHÁM PHÁ</span><h2 id="name" style="margin:9px 0 0">Chọn một thành phần</h2><p id="desc">Thông tin về cấu tạo và chức năng sẽ xuất hiện tại đây.</p></div><div class="controls"><button onclick="move(-1)">← Trước</button><button onclick="move(1)">Tiếp →</button></div></div>
+ </section>
+</section>
+<section class="panel quiz" id="onthap">
+ <h2>✦ Thử thách hiểu biết tế bào</h2><p id="question">Câu 1: Bào quan nào được xem là trung tâm điều khiển hoạt động của tế bào?</p>
+ <div class="answers" id="answers"></div><div class="feedback" id="feedback" aria-live="polite"></div>
+ <button class="primary" onclick="nextQ()">Câu tiếp theo →</button>
+</section>
+</main>
+<div class="foot">ANIMAL CELL LAB · Học tập bằng khám phá · Mô hình minh họa phục vụ học tập</div>
+<script>
+const data=[
+['Màng sinh chất','Ranh giới tế bào','Bao bọc tế bào, có tính thấm chọn lọc, kiểm soát sự trao đổi chất giữa tế bào và môi trường.'],
+['Nhân tế bào','Điều khiển hoạt động','Chứa phần lớn vật chất di truyền (DNA), điều khiển và điều hòa các hoạt động sống của tế bào.'],
+['Nhân con','Tổng hợp ribosome','Nằm trong nhân, tham gia tạo các thành phần cấu tạo nên ribosome.'],
+['Nhiễm sắc chất','Thông tin di truyền','Gồm DNA liên kết với protein; co xoắn tạo nhiễm sắc thể khi tế bào phân chia.'],
+['Lưới nội chất','Tổng hợp và vận chuyển','Hệ thống màng bên trong tế bào. Lưới nội chất hạt gắn ribosome; lưới nội chất trơn tham gia tổng hợp lipid và khử độc.'],
+['Ribosome','Tổng hợp protein','Bào quan nhỏ, có thể tự do trong tế bào chất hoặc bám trên lưới nội chất hạt; là nơi tổng hợp protein.'],
+['Bộ máy Golgi','Chế biến và đóng gói','Tiếp nhận, biến đổi, phân loại và đóng gói sản phẩm từ lưới nội chất để vận chuyển đến nơi cần thiết.'],
+['Ti thể','Tạo năng lượng','Nơi diễn ra phần lớn quá trình hô hấp tế bào hiếu khí, tạo ATP cung cấp năng lượng cho hoạt động tế bào.'],
+['Lysosome (tiêu thể)','Tiêu hóa nội bào','Chứa enzyme phân giải các chất, bào quan già và vật chất cần loại bỏ.'],
+['Túi vận chuyển','Vận chuyển vật chất','Các túi màng nhỏ giúp vận chuyển, lưu trữ hoặc đưa các chất đến những vị trí khác nhau trong tế bào.'],
+['Trung thể','Phân chia tế bào','Tham gia tổ chức vi ống và hình thành thoi phân bào ở nhiều tế bào động vật.'],
+['Khung xương tế bào','Nâng đỡ và vận động','Mạng lưới protein giúp duy trì hình dạng, nâng đỡ, định vị bào quan và hỗ trợ vận động tế bào.'],
+['Tế bào chất','Môi trường bên trong','Gồm bào tương và các bào quan; là nơi diễn ra nhiều phản ứng chuyển hóa của tế bào.']
+];
+let selected=0,scale=1;
+function renderList(){let q=document.getElementById('search').value.toLowerCase();document.getElementById('parts').innerHTML=data.map((d,i)=>({d,i})).filter(x=>(x.d[0]+' '+x.d[1]).toLowerCase().includes(q)).map(x=>`<button class="part ${x.i===selected?'active':''}" onclick="choose(${x.i})"><span class="num">${x.i+1}</span><span><b>${x.d[0]}</b><br><small>${x.d[1]}</small></span></button>`).join('')}
+function choose(i){selected=(i+data.length)%data.length;let d=data[selected];document.getElementById('category').textContent=d[1].toUpperCase();document.getElementById('name').textContent=d[0];document.getElementById('desc').textContent=d[2];document.querySelectorAll('.hot').forEach(e=>e.classList.toggle('selected',Number(e.dataset.id)===selected+1));renderList()}
+function move(n){choose(selected+n)}
+function zoom(n){scale=Math.max(.75,Math.min(1.5,scale*n));document.getElementById('zoomGroup').setAttribute('transform',`translate(${400*(1-scale)} ${285*(1-scale)}) scale(${scale})`)}
+function resetZoom(){scale=1;document.getElementById('zoomGroup').removeAttribute('transform')}
+document.querySelectorAll('.hot').forEach(e=>e.addEventListener('click',()=>choose(Math.max(0,Number(e.dataset.id)-1))));
+const qs=[
+['Bào quan nào được xem là trung tâm điều khiển hoạt động của tế bào?',['Ti thể','Nhân tế bào','Bộ máy Golgi','Lysosome'],1,'Nhân chứa DNA và điều khiển phần lớn hoạt động của tế bào.'],
+['Bào quan nào tạo phần lớn ATP trong hô hấp tế bào hiếu khí?',['Ti thể','Ribosome','Nhân con','Túi vận chuyển'],0,'Ti thể là nơi diễn ra phần lớn quá trình hô hấp tế bào hiếu khí.'],
+['Ribosome có chức năng chính là gì?',['Tiêu hóa nội bào','Tổng hợp protein','Đóng gói chất','Điều khiển tế bào'],1,'Ribosome là nơi diễn ra quá trình tổng hợp protein.'],
+['Bộ máy Golgi có vai trò nào sau đây?',['Chế biến và đóng gói sản phẩm','Chứa DNA','Tạo ATP','Tạo thoi phân bào'],0,'Bộ máy Golgi biến đổi, phân loại và đóng gói sản phẩm.'],
+['Cấu trúc nào kiểm soát sự trao đổi chất giữa tế bào và môi trường?',['Nhân','Màng sinh chất','Ti thể','Nhân con'],1,'Màng sinh chất có tính thấm chọn lọc và điều hòa trao đổi chất.']
+];let qi=0;
+function showQ(){let q=qs[qi];document.getElementById('question').textContent=`Câu ${qi+1}/${qs.length}: ${q[0]}`;document.getElementById('answers').innerHTML=q[1].map((a,i)=>`<button onclick="answer(${i})">${String.fromCharCode(65+i)}. ${a}</button>`).join('');document.getElementById('feedback').textContent=''}
+function answer(i){let q=qs[qi];document.getElementById('feedback').textContent=(i===q[2]?'✓ Chính xác! ':'Chưa chính xác. ')+q[3]}
+function nextQ(){qi=(qi+1)%qs.length;showQ()}
+renderList();choose(0);showQ();
+</script>
+</body></html>
